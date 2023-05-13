@@ -1,0 +1,26 @@
+{
+  "name": "itg-buddy",
+  "version": "1.0.0",
+  "description": "discord bot to communicate with itg-cli-server",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucdar/itg-buddy.git"
+  },
+  "author": "Lucas Clark",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lucdar/itg-buddy/issues"
+  },
+  "homepage": "https://github.com/lucdar/itg-buddy#readme",
+  "devDependencies": {
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "axios": "^1.4.0",
+    "discord.js": "^14.11.0"
+  }
+}
