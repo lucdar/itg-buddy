@@ -1,8 +1,8 @@
 import { SlashCommandBuilder, CommandInteraction } from 'discord.js';
-import { Command } from '../Interfaces';
+import { Command } from '../utils/Interfaces';
 import axios from 'axios';
 
-const ping: Command = {
+export const ping: Command = {
     data: new SlashCommandBuilder()
         .setName('ping')
         .setDescription('Runs the ping command.'),
@@ -11,5 +11,3 @@ const ping: Command = {
         await interaction.reply(response.data);
     },
 }
-
-export default ping

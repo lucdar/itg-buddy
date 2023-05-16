@@ -1,8 +1,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
-import { token } from './token.json';
-import { Command } from './Interfaces';
+import { token } from './secrets.json';
+import { Command } from './utils/Interfaces';
 import { ChatInputCommandInteraction } from 'discord.js';
 
 class CommandClient extends Client {
