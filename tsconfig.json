@@ -7,7 +7,6 @@
       "lib": ["es2022"],
       "module": "Node16",
       "target": "es2022",
-  
       "strict": true,
       "esModuleInterop": true,
       "skipLibCheck": true,
