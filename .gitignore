@@ -134,4 +134,4 @@ dist
 *.js
 
 # discord.js
-token.json
+secrets.json
