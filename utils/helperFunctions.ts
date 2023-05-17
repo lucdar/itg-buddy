@@ -11,7 +11,7 @@ const path = require('node:path');
  */
 export function getCommands(): Collection<string, Command> {
     const commands = new Collection<string, Command>();
-    const commandsPath: string = path.join(__dirname, 'commands');
+    const commandsPath: string = path.resolve(__dirname, '..', 'commands');
     const commandFiles: string[] = fs.readdirSync(commandsPath).filter((file: string) => file.endsWith('.js'));
     for (const file of commandFiles) {
         const filePath = path.join(commandsPath, file);
@@ -24,7 +24,7 @@ export function getCommands(): Collection<string, Command> {
         const command: Command = maybeCommand;
         commands.set(command.data.name, command);
     }
-    if (commands.keys.length === 0) {
+    if (commands.size === 0) {
         throw new Error('No commands were found.');
     }
     return commands;
