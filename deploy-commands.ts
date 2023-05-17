@@ -25,7 +25,8 @@ const rest = new REST().setToken(token);
 		);
 
         if (data instanceof Array) {
-		    console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+		    console.log(`Successfully reloaded ${data.length} application (/) commands:`);
+			console.log(data.map((command: any) => command.name).join(', '));
         } else {
             console.error(`Failed to load commands. Response from Discord: ${data}`);
         }
