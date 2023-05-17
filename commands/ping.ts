@@ -7,7 +7,11 @@ export const ping: Command = {
         .setName('ping')
         .setDescription('Runs the ping command.'),
     async execute(interaction: CommandInteraction) {
-        const response = await axios.get('http://localhost.com:9207/?command=ping');
-        await interaction.reply(response.data);
+        try {
+            const response = await axios.get('http://localhost:9207/?command=ping', { timeout: 2000 });
+            await interaction.reply(`Pong! The itg-cli-server responded with: ${JSON.stringify(response.data)}`);
+        } catch {
+            await interaction.reply('The server did not respond in time.');
+        }
     },
 }
