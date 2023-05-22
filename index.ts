@@ -4,7 +4,6 @@ import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
 import { token } from './secrets.json';
 import { Command } from './utils/Interfaces';
 import { getCommands } from './utils/helperFunctions';
-import { ChatInputCommandInteraction } from 'discord.js';
 
 class CommandClient extends Client {
     commands: Collection<string, Command>;
