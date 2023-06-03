@@ -1,4 +1,4 @@
-import { Collection } from 'discord.js';
+import { Collection, CommandInteraction } from 'discord.js';
 import { Command, instanceOfCommand } from './Interfaces';
 import { API_URL } from '../secrets.json';
 const fs = require('node:fs');
@@ -37,4 +37,14 @@ export function getCommands(): Collection<string, Command> {
  */
 export function getLinkForCommand(command: string): string {
     return `${API_URL}?command=${command}`;
+}
+
+export async function connectionErrorResponse(error: Error, interaction: CommandInteraction) {
+    console.log(error);    
+    const message = 'There was an error while connecting to the itg-cli-server.\n```' + error + '```';
+    if (interaction.replied || interaction.deferred) {
+        await interaction.followUp(message);
+    } else {
+        await interaction.reply(message);
+    }
 }
