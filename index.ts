@@ -4,6 +4,7 @@ import { Client, Collection, Events, GatewayIntentBits } from 'discord.js';
 import { token } from './secrets.json';
 import { Command } from './utils/Interfaces';
 import { getCommands } from './utils/helperFunctions';
+// import { io } from 'socket.io-client';
 
 class CommandClient extends Client {
     commands: Collection<string, Command>;
@@ -29,10 +30,11 @@ client.on(Events.InteractionCreate, async interaction => {
 		await command.execute(interaction);
 	} catch (error) {
 		console.error(error);
+		const errorReply = 'There was an error while executing this command!'
 		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+			await interaction.followUp({ content: errorReply, ephemeral: true });
 		} else {
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+			await interaction.reply({ content: errorReply, ephemeral: true });
 		}
 	}
 });
