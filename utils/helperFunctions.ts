@@ -1,6 +1,5 @@
 import { Collection, CommandInteraction } from 'discord.js';
 import { Command, instanceOfCommand } from './Interfaces';
-import { API_URL } from '../secrets.json';
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -29,14 +28,6 @@ export function getCommands(): Collection<string, Command> {
         throw new Error('No commands were found.');
     }
     return commands;
-}
-
-/**
- * Returns the link to make a request for a supplied command.
- * Abstraction to make it easier to change API_URL and route structure in the future.
- */
-export function getLinkForCommand(command: string): string {
-    return `${API_URL}?command=${command}`;
 }
 
 export async function connectionErrorResponse(error: Error, interaction: CommandInteraction) {
