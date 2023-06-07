@@ -30,6 +30,12 @@ export function getCommands(): Collection<string, Command> {
     return commands;
 }
 
+
+/**
+ * Replies to the interaction when there is a connection error.
+ * @param error an error that ocurred with the connection
+ * @param interaction the interaction that triggered the command
+ */
 export async function connectionErrorResponse(error: Error, interaction: CommandInteraction) {
     console.log(error);    
     const message = 'There was an error while connecting to the itg-cli-server.\n```' + error + '```';
