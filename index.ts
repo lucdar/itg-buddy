@@ -1,6 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
-import { Client, Collection, Events, GatewayIntentBits, CommandInteraction} from 'discord.js';
+import { Client, Collection, Events, GatewayIntentBits, ChatInputCommandInteraction} from 'discord.js';
 import { token } from './secrets.json';
 import { Command } from './utils/Interfaces';
 import { getCommands } from './utils/helperFunctions';
@@ -17,7 +17,7 @@ const client = new CommandClient();
 
 // CommandLock prevents the same command from being executed multiple times in parallel.
 const commandLock = new Set();
-async function executeCommand(command: Command, interaction: CommandInteraction) {
+async function executeCommand(command: Command, interaction: ChatInputCommandInteraction) {
 	try {
 		await command.execute(interaction).then(() => {
 			commandLock.delete(command.data.name);

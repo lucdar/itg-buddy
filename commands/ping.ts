@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, CommandInteraction } from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction } from 'discord.js';
 import { Command } from '../utils/Interfaces';
 import { connectionErrorResponse } from '../utils/helperFunctions';
 import { io, Socket } from 'socket.io-client';
@@ -13,7 +13,7 @@ export const ping: Command = {
     data: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description),
-    async execute(interaction: CommandInteraction) {
+    async execute(interaction: ChatInputCommandInteraction) {
         return new Promise(async (resolve, reject) => {
             console.log("Ping: executing command");
             await interaction.reply('Pinging...');
