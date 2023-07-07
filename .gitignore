@@ -135,3 +135,5 @@ dist
 
 # discord.js
 secrets.json
+/songs
+/.dls
