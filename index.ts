@@ -19,26 +19,6 @@ class CommandClient extends Client {
 }
 const client = new CommandClient();
 
-// CommandLock prevents the same command from being executed multiple times in parallel.
-// TODO: Remove this, it's not needed anymore (I think).
-const commandLock = new Set();
-async function executeCommand(command: Command, interaction: ChatInputCommandInteraction) {
-	try {
-		await command.execute(interaction).then(() => {
-			commandLock.delete(command.data.name);
-		});
-	} catch (error) {
-		console.error(error);
-		const errorReply = 'There was an error while executing this command!'
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: errorReply, ephemeral: true });
-		} else {
-			await interaction.reply({ content: errorReply, ephemeral: true });
-		}
-		commandLock.delete(command.data.name);
-	}
-}
-
 // Execute the commands when they are called.
 client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
@@ -47,12 +27,15 @@ client.on(Events.InteractionCreate, async interaction => {
 		console.error(`No command matching ${interaction.commandName} was found.`);
 		return;
 	}
-	if (commandLock.has(command.data.name)) {
-		console.log(`Command ${command.data.name} is already running.`);
-		interaction.reply({ content: 'This command is already running. Please wait and try again.', ephemeral: true });
-	} else {
-		commandLock.add(command.data.name);
-		executeCommand(command, interaction);
+	try {
+		await command.execute(interaction);
+	} catch (error) {
+		const errorReply = 'There was an error while executing this command! ```' + error + '```';
+		if (interaction.replied || interaction.deferred) {
+			await interaction.followUp({ content: errorReply, ephemeral: true });
+		} else {
+			await interaction.reply({ content: errorReply, ephemeral: true });
+		}
 	}
 });
 
