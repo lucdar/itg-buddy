@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 import { Client, Collection, Events, GatewayIntentBits, ChatInputCommandInteraction} from 'discord.js';
-import { token } from './secrets.json';
+import { token, addSongChannel } from './secrets.json';
 import { Command } from './utils/Interfaces';
 import { getCommands } from './utils/helperFunctions';
 // import { io } from 'socket.io-client';
@@ -9,13 +9,18 @@ import { getCommands } from './utils/helperFunctions';
 class CommandClient extends Client {
     commands: Collection<string, Command>;
     constructor() {
-        super({ intents: [GatewayIntentBits.Guilds] });
+        super({ intents: [
+			GatewayIntentBits.Guilds, 
+			GatewayIntentBits.GuildMessages, 
+			GatewayIntentBits.MessageContent
+		]});
         this.commands = getCommands();
     }
 }
 const client = new CommandClient();
 
 // CommandLock prevents the same command from being executed multiple times in parallel.
+// TODO: Remove this, it's not needed anymore (I think).
 const commandLock = new Set();
 async function executeCommand(command: Command, interaction: ChatInputCommandInteraction) {
 	try {
@@ -49,6 +54,27 @@ client.on(Events.InteractionCreate, async interaction => {
 		commandLock.add(command.data.name);
 		executeCommand(command, interaction);
 	}
+});
+
+
+// Execute add-song when a file is uploaded to the add-song channel.
+import { addSongFromLink } from './commands/add-song';
+import { MessageOrInteraction } from './utils/MessageOrInteraction';
+
+client.on(Events.MessageCreate, async message => {
+	if (message.channel.id !== addSongChannel) return;
+	if (message.author.bot) return;
+	const attachment = message.attachments.first();
+	if (!attachment) return;
+	if (attachment.contentType !== 'application/zip') {
+		message.reply('File must be a .zip file.');
+		return;
+	}
+	const link = attachment.url;
+	if (!link) return;
+	const moi = new MessageOrInteraction(message)
+	moi.reply('Adding song...');
+	addSongFromLink(moi, link);
 });
 
 // Log in to the client.

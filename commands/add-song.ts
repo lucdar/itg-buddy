@@ -1,5 +1,6 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, InteractionUpdateOptions, ActionRow, ButtonComponent, InteractionButtonComponentData, ButtonInteraction, CollectorFilter, MessageComponentCollectorOptions, ComponentType} from 'discord.js';
+import { SlashCommandBuilder, ChatInputCommandInteraction, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, InteractionUpdateOptions, ActionRow, ButtonComponent, InteractionButtonComponentData, ButtonInteraction, CollectorFilter, MessageComponentCollectorOptions, ComponentType, MessagePayload} from 'discord.js';
 import { Command } from '../utils/Interfaces';
+import { MessageOrInteraction } from '../utils/MessageOrInteraction';
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process';
 
 const name = 'add-song';
@@ -13,53 +14,63 @@ export const addSong: Command = {
             option.setName('link')
                 .setDescription('The link to the song to add.')),
     async execute(interaction: ChatInputCommandInteraction) {
-        return new Promise(async (resolve, reject) => {
-            console.log("AddSong: executing command");
-            await interaction.reply('Adding song...');
+        console.log("AddSong: executing command");
+        await interaction.reply('Adding song...');
 
-            const link = interaction.options.getString('link');
-            if (link === null) {
-                interaction.editReply('No link provided.');
-                reject('No link provided.');
-                return;
-            }
-
-            const cli = spawn('python3', ["../itg-cli/main.py", 'add-song', link]);
-            cli.stdout.on('data', async (output: String) => {
-                output = output.toString();
-                console.log('AddSong: received output from cli:', output);
-                // Detect if the cli is prompting for input
-                if (output.indexOf('Prompt') !== -1) {
-                    // Determine what the cli is prompting for
-                    if (output.indexOf('Overwrite cached download file?') !== -1) {
-                        // Overwrite the file by default.
-                        cli.stdin.write('O\n');
-                    } else if (output.indexOf('A folder with the same name already exists.')) {
-                        // Prompt the user to choose whether to overwrite the simfile or not
-                        // and input the response into the cli.
-                        promptSimfileOverwrite(interaction, cli);
-                    }
-                }
-                // Detect a successful song addition
-                if (output.indexOf('Song added successfully') !== -1) {
-                    interaction.editReply('Song added successfully. ```' + output + '```');
-                    resolve();
-                }
-            });
-            // Detect errors
-            cli.stderr.on('data', (error: String) => {
-                console.log('AddSong: received error from cli:', error);
-                interaction.editReply('Error adding song.');
-                reject(error);
-            })
-        });
+        const link = interaction.options.getString('link');
+        if (link === null) {
+            interaction.editReply('No link provided.');
+            return;
+        }
+        
+        addSongFromLink(new MessageOrInteraction(interaction), link);
     }
 }
 
-async function promptSimfileOverwrite(interaction: ChatInputCommandInteraction, cli: ChildProcessWithoutNullStreams) {
-    interaction.editReply({
-        content: 'A folder with the same name already exists.',
-        components: [
+export async function addSongFromLink(interaction: MessageOrInteraction, link: string) {
+    const cli = spawn('python3', ["../itg-cli/main.py", 'add-song', link]);
+    cli.stdout.on('data', async (output: String) => {
+        output = output.toString();
+        // console.log('AddSong: received output from cli:', output);
+        // Detect if the cli is prompting for input
+        if (output.indexOf('Prompt') !== -1) {
+            // Determine what the cli is prompting for
+            if (output.indexOf('Overwrite cached download file?') !== -1) {
+                // Overwrite the file by default.
+                cli.stdin.write('O\n');
+            } else if (output.indexOf('A folder with the same name already exists.') !== -1) {
+                // Prompt the user to choose whether to overwrite the simfile or not
+                // and input the response into the cli.
+                promptSimfileOverwrite(interaction, cli);
+            } else if (output.indexOf('Multiple valid simfiles found') !== -1) {
+                // Exit the cli and send the user a message.
+                interaction.editReply('Multiple valid simfiles found. Please only include one simfile at a time.');
+                cli.kill();
+            } else {
+                console.log('AddSong: received unknown prompt from cli:', output);
+                interaction.editReply('Error adding song.');
+                cli.kill();
+            }
+        }
+        // Detect a successful song addition
+        if (output.indexOf('Song added successfully') !== -1) {
+            interaction.editReply('Song added successfully. ```' + output + '```');
+        }
+    });
+    // Detect errors
+    cli.stderr.on('data', (error: String) => {
+        console.log('AddSong: received error from cli:', error);
+        interaction.editReply('Error adding song.');
+    });
+}
+
+async function promptSimfileOverwrite(interaction: MessageOrInteraction, cli: ChildProcessWithoutNullStreams) {
+    if (interaction.channel === null) {
+        throw new Error('Interaction channel is null.');
+    }
+    interaction.editReply(MessagePayload.create(
+        interaction.channel, 'A folder with the same name already exists.',{ 
+            components: [
             new ActionRowBuilder<ButtonBuilder>()
                 .addComponents( 
                     new ButtonBuilder()
@@ -71,8 +82,8 @@ async function promptSimfileOverwrite(interaction: ChatInputCommandInteraction, 
                         .setLabel('Keep Existing')
                         .setStyle(ButtonStyle.Secondary),
                 )
-        ]
-    });
+            ]}
+    ));
     
     const filter = (i: ButtonInteraction) => {
         return i.user.id === interaction.user.id;
@@ -104,14 +115,17 @@ async function promptSimfileOverwrite(interaction: ChatInputCommandInteraction, 
                 cli.stdin.write('E\n');
             }
         });
-    
+        
+
         collector.on('end', (collected) => {
-            console.log('AddSong: collector ended.');
+            if (interaction.channel === null) {
+                throw new Error('Interaction channel is null.');
+            }
             if (collected.size === 0) {
-                interaction.editReply({
-                    content: 'Timed out. Keeping existing simfile.',
-                    components: []
-                });
+                interaction.editReply(MessagePayload.create(
+                    interaction.channel, 'Timed out. Keeping existing simfile.',
+                    { components: [] }
+                ));
                 cli.stdin.write('E\n');
             }
         });
