@@ -1,5 +1,16 @@
-import { Collection, CommandInteraction } from "discord.js";
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonInteraction,
+  ButtonStyle,
+  Collection,
+  CommandInteraction,
+  ComponentType,
+  MessagePayload,
+} from "discord.js";
 import { Command, instanceOfCommand } from "./Interfaces";
+import { MessageOrInteraction } from "./MessageOrInteraction";
+import { ChildProcessWithoutNullStreams } from "child_process";
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -33,22 +44,94 @@ export function getCommands(): Collection<string, Command> {
 }
 
 /**
- * Replies to the interaction when there is a connection error.
- * @param error an error that ocurred with the connection
+ * Prompts the user to choose whether to overwrite a pack/simfile or not.
  * @param interaction the interaction that triggered the command
+ * @param cli the child process that is running the itg-cli command
+ * @param type "pack" | "simfile" - the type of file that is being overwritten
  */
-export async function connectionErrorResponse(
-  error: Error,
-  interaction: CommandInteraction
+export async function promptOverwrite(
+  interaction: MessageOrInteraction,
+  cli: ChildProcessWithoutNullStreams,
+  type: string
 ) {
-  console.log(error);
-  const message =
-    "There was an error while connecting to the itg-cli-server.\n```" +
-    error +
-    "```";
-  if (interaction.replied || interaction.deferred) {
-    await interaction.followUp(message);
-  } else {
-    await interaction.reply(message);
+  if (interaction.channel === null) {
+    throw new Error("Interaction channel is null.");
+  }
+  interaction.editReply(
+    MessagePayload.create(
+      interaction.channel,
+      `A ${type} with the same name already exists.`,
+      {
+        components: [
+          new ActionRowBuilder<ButtonBuilder>().addComponents(
+            new ButtonBuilder()
+              .setCustomId("overwrite")
+              .setLabel("Overwrite")
+              .setStyle(ButtonStyle.Danger),
+            new ButtonBuilder()
+              .setCustomId("existing")
+              .setLabel("Keep Existing")
+              .setStyle(ButtonStyle.Secondary)
+          ),
+        ],
+      }
+    )
+  );
+
+  const filter = (i: ButtonInteraction) => {
+    return i.user.id === interaction.user.id;
+  };
+
+  try {
+    const channel = interaction.channel;
+    if (!channel) {
+      throw new Error("Interaction channel is null.");
+    }
+    const collector = channel.createMessageComponentCollector({
+      filter,
+      time: 15000,
+      componentType: ComponentType.Button,
+    });
+
+    collector.on("collect", (interaction) => {
+      if (interaction.customId === "overwrite") {
+        interaction
+          .update({
+            content: `Overwriting ${type}...`,
+            components: [],
+          })
+          .then(() => {
+            cli.stdin.write("O\n");
+          });
+      } else if (interaction.customId === "existing") {
+        interaction
+          .update({
+            content: `Keeping existing ${type}.`,
+            components: [],
+          })
+          .then(() => {
+            cli.stdin.write("E\n");
+          });
+      }
+    });
+
+    collector.on("end", (collected) => {
+      if (interaction.channel === null) {
+        throw new Error("Interaction channel is null.");
+      }
+      if (collected.size === 0) {
+        interaction.editReply(
+          MessagePayload.create(
+            interaction.channel,
+            `Timed out. Keeping existing ${type}.`,
+            { components: [] }
+          )
+        );
+        cli.stdin.write("E\n");
+      }
+    });
+  } catch (error) {
+    console.log("AddSong: error creating collector:", error);
+    interaction.editReply("Error adding song: ```" + error + "```");
   }
 }
