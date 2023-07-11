@@ -1,18 +1,18 @@
 // Imported from https://github.com/tsconfig/bases/blob/main/bases/node20.json
 {
-    "$schema": "https://json.schemastore.org/tsconfig",
-    "display": "Node 20",
-  
-    "compilerOptions": {
-      "lib": ["es2022"],
-      "module": "Node16",
-      "target": "es2022",
-      "strict": true,
-      "esModuleInterop": true,
-      "skipLibCheck": true,
-      "forceConsistentCasingInFileNames": true,
-      "moduleResolution": "node",
-      // Custom Lines:
-      "resolveJsonModule": true
-    }
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node 20",
+
+  "compilerOptions": {
+    "lib": ["es2022"],
+    "module": "Node16",
+    "target": "es2022",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    // Custom Lines:
+    "resolveJsonModule": true
   }
+}
