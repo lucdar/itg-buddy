@@ -33,16 +33,16 @@ export async function addSongFromLink(interaction: MessageOrInteraction, link: s
         output = output.toString();
         // console.log('AddSong: received output from cli:', output);
         // Detect if the cli is prompting for input
-        if (output.indexOf('Prompt') !== -1) {
+        if (output.includes('Prompt')) {
             // Determine what the cli is prompting for
-            if (output.indexOf('Overwrite cached download file?') !== -1) {
+            if (output.includes('Overwrite cached download file?')) {
                 // Overwrite the file by default.
                 cli.stdin.write('O\n');
-            } else if (output.indexOf('A folder with the same name already exists.') !== -1) {
+            } else if (output.includes('A folder with the same name already exists.')) {
                 // Prompt the user to choose whether to overwrite the simfile or not
                 // and input the response into the cli.
                 promptSimfileOverwrite(interaction, cli);
-            } else if (output.indexOf('Multiple valid simfiles found') !== -1) {
+            } else if (output.includes('Multiple valid simfiles found')) {
                 // Exit the cli and send the user a message.
                 interaction.editReply('Multiple valid simfiles found. Please only include one simfile at a time.');
                 cli.kill();
@@ -53,8 +53,9 @@ export async function addSongFromLink(interaction: MessageOrInteraction, link: s
             }
         }
         // Detect a successful song addition
-        if (output.indexOf('Song added successfully') !== -1) {
-            interaction.editReply('Song added successfully. ```' + output + '```');
+        if (output.includes('Song added successfully')) {
+            const songInfo = output.split('### Song added successfully ###')[1];
+            interaction.editReply('Song added successfully. ```' + songInfo + '```');
         }
     });
     // Detect errors
@@ -105,14 +106,16 @@ async function promptSimfileOverwrite(interaction: MessageOrInteraction, cli: Ch
                 interaction.update({
                     content: 'Overwriting...',
                     components: []
-                });
-                cli.stdin.write('O\n');
+                }).then(() => {
+                    cli.stdin.write('O\n');
+                })
             } else if (interaction.customId === 'existing') {
                 interaction.update({
                     content: 'Keeping existing simfile.',
                     components: []
-                });
-                cli.stdin.write('E\n');
+                }).then(() => {
+                    cli.stdin.write('E\n');
+                })
             }
         });
         
