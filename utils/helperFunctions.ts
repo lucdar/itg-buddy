@@ -4,7 +4,6 @@ import {
   ButtonInteraction,
   ButtonStyle,
   Collection,
-  CommandInteraction,
   ComponentType,
   MessagePayload,
 } from "discord.js";
@@ -13,6 +12,17 @@ import { MessageOrInteraction } from "./MessageOrInteraction";
 import { ChildProcessWithoutNullStreams } from "child_process";
 const fs = require("node:fs");
 const path = require("node:path");
+
+/**
+ * Formats comment and code into a string with code block.
+ * @param comment the comment to be formatted
+ * @param code the code to be formatted
+ * @example formatComment("This is a comment.", "python")
+ * returns "This is a comment.```python```"
+ */
+export function codeFormat(comment: string, code: string): string {
+  return comment + "```" + code + "```";
+}
 
 /**
  * Returns a collection of commands based on the files in the commands directory
@@ -130,8 +140,8 @@ export async function promptOverwrite(
         cli.stdin.write("E\n");
       }
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log("AddSong: error creating collector:", error);
-    interaction.editReply("Error adding song: ```" + error + "```");
+    interaction.editReply(codeFormat("Error adding song:", error.toString()));
   }
 }

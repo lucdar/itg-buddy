@@ -1,17 +1,8 @@
-import {
-  SlashCommandBuilder,
-  ChatInputCommandInteraction,
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ButtonInteraction,
-  ComponentType,
-  MessagePayload,
-} from "discord.js";
+import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
 import { Command } from "../utils/Interfaces";
 import { MessageOrInteraction } from "../utils/MessageOrInteraction";
-import { ChildProcessWithoutNullStreams, spawn } from "child_process";
-import { promptOverwrite } from "../utils/helperFunctions";
+import { spawn } from "child_process";
+import { codeFormat, promptOverwrite } from "../utils/helperFunctions";
 
 const name = "add-song";
 const description = "Add a song from a specified link.";
@@ -76,7 +67,7 @@ export async function addSongFromLink(
     // Detect a successful song addition
     if (output.includes("Song added successfully")) {
       const songInfo = output.split("### Song added successfully ###")[1];
-      interaction.editReply("Song added successfully. ```" + songInfo + "```");
+      interaction.editReply(codeFormat("Song added successfully.", songInfo));
     }
   });
   // Detect errors
