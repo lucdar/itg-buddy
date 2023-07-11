@@ -1,7 +1,7 @@
 import { Client, Collection, Events, GatewayIntentBits } from "discord.js";
 import { token, addSongChannel } from "./secrets.json";
 import { Command } from "./utils/Interfaces";
-import { getCommands } from "./utils/helperFunctions";
+import { getCommands, codeFormat } from "./utils/helperFunctions";
 // import { io } from 'socket.io-client';
 
 class CommandClient extends Client {
@@ -29,9 +29,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
   try {
     await command.execute(interaction);
-  } catch (error) {
-    const errorReply =
-      "There was an error while executing this command! ```" + error + "```";
+  } catch (error: any) {
+    const errorReply = codeFormat(
+      "There was an error while executing this command!",
+      error.toString()
+    );
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({
         content: errorReply,
