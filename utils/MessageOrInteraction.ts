@@ -100,5 +100,17 @@ function generateMessages(content: string | MessagePayload) {
     }
     messages.push(content);
   }
+  return addMissingCodeDelimiters(messages);
+}
+
+function addMissingCodeDelimiters(messages: string[]) {
+  if (messages.length <= 1) return messages;
+  for (let i = 0; i < messages.length - 1; i++) {
+    const delimiterCount = (messages[i].match(/```/g) || []).length;
+    if (delimiterCount % 2 === 1) {
+      messages[i] += "```";
+      messages[i + 1] = "```" + messages[i + 1];
+    }
+  }
   return messages;
 }
