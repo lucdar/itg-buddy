@@ -38,6 +38,7 @@ function addPackFromLink(interaction: MessageOrInteraction, link: string) {
   }
   const cli = spawn("python3", ["../itg-cli/main.py", "add-pack", link]);
   let packMetadata: string = "";
+  let replyLock = false;
   cli.stdout.on("data", (data) => {
     const output: String = data.toString();
     console.log(`AddPack: stdout: ${output}`);
@@ -60,22 +61,26 @@ function addPackFromLink(interaction: MessageOrInteraction, link: string) {
       interaction.editReply(codeFormat(output.toString(), packMetadata));
     }
   });
-
   cli.stderr.on("data", (output) => {
-    console.error("AddPack: stderr:" + output);
-    // TODO: for some reason the Google Drive API writes download updates to this stream
-    // and it causes the bot to run up against the Discord API rate limit.
-    // Need to figure out how to mitigate this. (Only provide updates every once in a while?)
-    // Would be nice to have these download progress updates though!
-
-    // interaction.editReply(
-    //   codeFormat("An error occurred while adding the pack.", output.toString())
-    // );
-  });
-  cli.on("close", (code) => {
-    console.log(`AddPack: child process exited with code ${code}`);
-    if (code !== 0) {
-      interaction.editReply("An error occurred while adding the pack.");
+    if (output.toString().match(/\d+%/)) {
+      if (replyLock) {
+        console.log("AddPack: reply lock is active, not replying.");
+        return;
+      }
+      replyLock = true;
+      setTimeout(() => {
+        replyLock = false;
+      }, 300);
+      interaction.editReply(
+        codeFormat("Downloading pack...", output.toString())
+      );
+    } else {
+      interaction.editReply(
+        codeFormat(
+          "An error occurred while adding the pack.",
+          output.toString()
+        )
+      );
     }
   });
 }
