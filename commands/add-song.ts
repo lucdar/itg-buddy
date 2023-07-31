@@ -2,7 +2,11 @@ import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
 import { Command } from "../utils/Interfaces";
 import { MessageOrInteraction } from "../utils/MessageOrInteraction";
 import { spawn } from "child_process";
-import { codeFormat, promptOverwrite } from "../utils/helperFunctions";
+import {
+  codeFormat,
+  createErrorHandler,
+  promptOverwrite,
+} from "../utils/helperFunctions";
 
 const name = "add-song";
 const description = "Add a song from a specified link.";
@@ -36,6 +40,7 @@ export async function addSongFromLink(
     interaction.editReply("Invalid link.");
     return;
   }
+  const errorHandler = createErrorHandler();
   const cli = spawn("python3", ["../itg-cli/main.py", "add-song", link]);
   cli.stdout.on("data", async (output: String) => {
     output = output.toString();
@@ -70,9 +75,7 @@ export async function addSongFromLink(
       interaction.editReply(codeFormat("Song added successfully.", songInfo));
     }
   });
-  // Detect errors
-  cli.stderr.on("data", (error: String) => {
-    console.log("AddSong: received error from cli:", error);
-    interaction.editReply("Error adding song.");
+  cli.stderr.on("data", (output) => {
+    errorHandler(output, interaction, "AddSong");
   });
 }

@@ -61,7 +61,7 @@ client.on(Events.MessageCreate, async (message) => {
   const link = attachment.url;
   if (!link) return;
   const moi = new MessageOrInteraction(message);
-  moi.reply("Adding song...");
+  await moi.reply("Adding song...");
   addSongFromLink(moi, link);
 });
 

@@ -145,3 +145,38 @@ export async function promptOverwrite(
     interaction.editReply(codeFormat("Error adding song:", error.toString()));
   }
 }
+
+/**
+ * Closure that returns a function to handle stderr output from the itg-cli command.
+ * @returns a function that handles stderr output from the itg-cli command.
+ * @param output the output from the itg-cli command
+ * @param interaction the interaction that triggered the command
+ * @param command the command that is being executed
+ */
+export function createErrorHandler() {
+  let replyLock = false;
+
+  return async (
+    output: string | Buffer | Error,
+    interaction: MessageOrInteraction,
+    command: "AddSong" | "AddPack"
+  ) => {
+    if (output.toString().match(/\d+%/)) {
+      if (replyLock) {
+        return;
+      }
+      replyLock = true;
+      setTimeout(() => {
+        replyLock = false;
+      }, 300);
+      interaction.editReply(codeFormat("Downloading...", output.toString()));
+    } else if (output.toString().indexOf("To:") === 0) {
+      return; // Output by gdown. Ignore.
+    } else {
+      console.error(`${command}: stderr: ${output.toString()}`);
+      interaction.editReply(
+        codeFormat("An error occurred.", output.toString())
+      );
+    }
+  };
+}

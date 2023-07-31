@@ -1,7 +1,11 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
 import { Command } from "../utils/Interfaces";
 import { spawn } from "child_process";
-import { codeFormat, promptOverwrite } from "../utils/helperFunctions";
+import {
+  codeFormat,
+  promptOverwrite,
+  createErrorHandler,
+} from "../utils/helperFunctions";
 import { MessageOrInteraction } from "../utils/MessageOrInteraction";
 
 const name = "add-pack";
@@ -38,7 +42,7 @@ function addPackFromLink(interaction: MessageOrInteraction, link: string) {
   }
   const cli = spawn("python3", ["../itg-cli/main.py", "add-pack", link]);
   let packMetadata: string = "";
-  let replyLock = false;
+  const errorHandler = createErrorHandler();
   cli.stdout.on("data", (data) => {
     const output: String = data.toString();
     console.log(`AddPack: stdout: ${output}`);
@@ -62,25 +66,6 @@ function addPackFromLink(interaction: MessageOrInteraction, link: string) {
     }
   });
   cli.stderr.on("data", (output) => {
-    if (output.toString().match(/\d+%/)) {
-      if (replyLock) {
-        console.log("AddPack: reply lock is active, not replying.");
-        return;
-      }
-      replyLock = true;
-      setTimeout(() => {
-        replyLock = false;
-      }, 300);
-      interaction.editReply(
-        codeFormat("Downloading pack...", output.toString())
-      );
-    } else {
-      interaction.editReply(
-        codeFormat(
-          "An error occurred while adding the pack.",
-          output.toString()
-        )
-      );
-    }
+    errorHandler(output, interaction, "AddPack");
   });
 }
