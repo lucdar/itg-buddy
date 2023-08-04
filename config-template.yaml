@@ -1,0 +1,15 @@
+# ITG-Buddy configuration file
+# This file is a template. Copy it to config.yaml and edit it to your needs.
+
+# Discord bot token
+token: ""
+
+# Discord bot client ID
+clientId: ""
+
+# Discord guild ID and channel ID for drag & drop add-song
+guildId: ""
+addSongChannel: ""
+
+# Path to file for gamestate updates
+gamestateFile: ""

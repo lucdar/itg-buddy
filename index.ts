@@ -1,5 +1,5 @@
 import { Client, Collection, Events, GatewayIntentBits } from "discord.js";
-import { token, addSongChannel } from "./secrets.json";
+import config from "./config";
 import { Command } from "./utils/Interfaces";
 import { getCommands, codeFormat } from "./utils/helperFunctions";
 // import { io } from 'socket.io-client';
@@ -50,7 +50,7 @@ import { addSongFromLink } from "./commands/add-song";
 import { MessageOrInteraction } from "./utils/MessageOrInteraction";
 
 client.on(Events.MessageCreate, async (message) => {
-  if (message.channel.id !== addSongChannel) return;
+  if (message.channel.id !== config.addSongChannel) return;
   if (message.author.bot) return;
   const attachment = message.attachments.first();
   if (!attachment) return;
@@ -70,4 +70,4 @@ client.once(Events.ClientReady, (c) => {
   console.log("Ready! Logged in as " + c.user?.tag);
 });
 
-client.login(token);
+client.login(config.token);

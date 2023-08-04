@@ -134,7 +134,4 @@ dist
 *.js
 
 # discord.js
-secrets.json
-/courses
-/songs
-/.dls
+config.yaml
