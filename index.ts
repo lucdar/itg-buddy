@@ -1,9 +1,16 @@
-import { Client, Collection, Events, GatewayIntentBits } from "discord.js";
+import {
+  Client,
+  Collection,
+  Events,
+  GatewayIntentBits,
+  ActivityType,
+  ActivitiesOptions,
+  PresenceStatusData,
+} from "discord.js";
 import config from "./config";
 import { Command } from "./utils/Interfaces";
 import { getCommands, codeFormat } from "./utils/helperFunctions";
-// import { io } from 'socket.io-client';
-
+import { watchGamestate, Gamestate } from "./gamestate";
 class CommandClient extends Client {
   commands: Collection<string, Command>;
   constructor() {
@@ -71,3 +78,62 @@ client.once(Events.ClientReady, (c) => {
 });
 
 client.login(config.token);
+
+if (config.saveFolder === null) {
+  console.error(
+    "No save folder specified in config.json. Not watching gamestate."
+  );
+} else {
+  console.log("Watching gamestate...");
+  watchGamestate((gamestate: Gamestate) => {
+    // Update bot's status and activity based on the gamestate.
+    let status: PresenceStatusData;
+    let activity: ActivitiesOptions;
+
+    switch (gamestate.currentScreen) {
+      case "ScreenGameplay": {
+        // Gameplay Screen
+        status = "online";
+        activity = {
+          name: `${gamestate.songInfo?.title}`,
+          type: ActivityType.Playing,
+        };
+        break;
+      }
+      case "ScreenEvaluationStage": {
+        // Score Screen
+        status = "online";
+        activity = {
+          name: `${gamestate.songInfo?.title} (Score Screen)`,
+          type: ActivityType.Playing,
+        };
+        break;
+      }
+      case "ScreenSelectMusic": {
+        // Song Select Screen
+        status = "online";
+        activity = {
+          name: "Song Select",
+          type: ActivityType.Playing,
+        };
+        break;
+      }
+      default: {
+        status = "idle";
+        activity = {
+          name: "Waiting on next players...",
+          type: ActivityType.Playing,
+        };
+        break;
+      }
+    }
+
+    if (!client.user) {
+      console.error("No client user found!");
+      return;
+    }
+    client.user.setStatus(status);
+    console.log("Setting Presence: " + activity.name);
+    client.user.setActivity(activity);
+  });
+}

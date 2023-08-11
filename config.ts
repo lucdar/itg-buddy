@@ -21,15 +21,21 @@ export class Config {
   clientId: string;
   guildId: string;
   addSongChannel: string;
+  saveFolder: string | null;
 
   constructor(configPath: string) {
-    let config = yaml.load(fs.readFileSync(configPath, "utf8"));
+    let config: any = yaml.load(fs.readFileSync(configPath, "utf8"));
     console.log(`Loaded config from ${configPath}`);
 
     this.token = config.token;
     this.clientId = config.clientId;
     this.guildId = config.guildId;
     this.addSongChannel = config.addSongChannel;
+    this.saveFolder = config.saveFolder;
+    // Using == because I'm not sure how yaml loads undefined values
+    if (this.saveFolder == undefined) {
+      this.saveFolder = null;
+    }
 
     // Check for missing required values
     for (const [key, value] of Object.entries(this)) {

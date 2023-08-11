@@ -11,5 +11,7 @@ clientId: ""
 guildId: ""
 addSongChannel: ""
 
-# Path to file for gamestate updates
-gamestateFile: ""
+# Path to itgmania Save folder. Used to watch for for gamestate updates.
+# Make sure you have the ScreenSwitcher and WriteSongInfo modules installed.
+# https://github.com/Simply-Love/Simply-Love-Modules
+saveFolder: "" # Comment this line if you don't want to use this feature.
