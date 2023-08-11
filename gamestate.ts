@@ -2,6 +2,7 @@ import chokidar from "chokidar";
 import config from "./config";
 import path from "path";
 import fs from "fs";
+import { EmbedBuilder } from "discord.js";
 
 // Watch the Save folder for changes to CurrentScreen.txt and SongInfo.txt.
 // When they change, update the gamestate and run the callback.
@@ -73,5 +74,33 @@ export class Gamestate {
       steps: songInfoLines[4].split(": ")[1],
       length: songInfoLines[5].split(": ")[1],
     };
+  }
+
+  embeds(): EmbedBuilder[] {
+    const color = 0x39a0ed;
+    let gamestateLines = [`**Screen:** ${this.currentScreen}`];
+    const gamestateEmbed = new EmbedBuilder()
+      .setTitle("Gamestate")
+      .setTimestamp(this.timestamp)
+      .setDescription(gamestateLines.join("\n"))
+      .setColor(color);
+    if (!this.songInfo) {
+      return [gamestateEmbed];
+    }
+
+    const songInfoLines = [
+      `**Song:** ${this.songInfo.title}`,
+      `**Artist:** ${this.songInfo.artist}`,
+      `**Pack:** ${this.songInfo.pack}`,
+      `**Difficulty:** ${this.songInfo.diff}`,
+      `**Steps:** ${this.songInfo.steps}`,
+      `**Length:** ${this.songInfo.length}`,
+    ];
+    const songInfoEmbed = new EmbedBuilder()
+      .setTitle("Song Info")
+      .setTimestamp(this.timestamp)
+      .setDescription(songInfoLines.join("\n"))
+      .setColor(color);
+    return [gamestateEmbed, songInfoEmbed];
   }
 }
