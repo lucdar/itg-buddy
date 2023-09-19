@@ -11,6 +11,8 @@ import config from "./config";
 import { Command } from "./utils/Interfaces";
 import { getCommands, codeFormat } from "./utils/helperFunctions";
 import { watchGamestate, Gamestate } from "./gamestate";
+
+// Create a new client.
 class CommandClient extends Client {
   commands: Collection<string, Command>;
   constructor() {

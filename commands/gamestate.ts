@@ -5,7 +5,7 @@ import { Gamestate } from "../gamestate";
 const name = "gamestate";
 const description = "Prints an embed with the current gamestate.";
 
-export const addPack: Command = {
+export const gamestate: Command = {
   data: new SlashCommandBuilder().setName(name).setDescription(description),
   async execute(interaction: ChatInputCommandInteraction) {
     console.log("Gamestate: executing command");
