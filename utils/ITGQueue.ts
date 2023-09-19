@@ -1,3 +1,5 @@
+import { EmbedBuilder } from "discord.js";
+
 /**
  * A two-column queue for representing players waiting in line to play.
  * The left column is for the p1 side, and the right column is for the p2 side.
@@ -17,6 +19,7 @@ export class ITGQueue {
    */
   public get(i: number): [String | null, String | null] {
     if (i >= this.length) {
+      console.error("Index out of bounds");
       throw new Error("Index out of bounds");
     }
     return [this.p1q[i], this.p2q[i]];
@@ -42,8 +45,14 @@ export class ITGQueue {
       }
     }
     // If the queue is full, add the player to a new row at the end
-    this.p1q.push(player);
-    this.p2q.push(null);
+    // Default to p1 side if no side is specified
+    if (side === "p2") {
+      this.p1q.push(null);
+      this.p2q.push(player);
+    } else {
+      this.p1q.push(player);
+      this.p2q.push(null);
+    }
     this.length++;
   }
   /**
@@ -54,8 +63,17 @@ export class ITGQueue {
    * @param side "p1" or "p2"
    */
   public joinAt(player: String, i: number, side: "p1" | "p2") {
+    if (i > this.length) {
+      throw new Error("Index out of bounds");
+    }
     if (this.get(i)[side === "p1" ? 0 : 1] !== null) {
       throw new Error("Cannot join at an occupied position");
+    }
+    // Increase the length of the queue if the player is joining at the end
+    if (i === this.length) {
+      this.p1q.push(null);
+      this.p2q.push(null);
+      this.length++;
     }
     if (side === "p1") {
       this.p1q[i] = player;
@@ -91,4 +109,60 @@ export class ITGQueue {
       this.length--;
     }
   }
+  /**
+   * Returns an Embed representation of the queue.
+   */
+  public toEmbed(): EmbedBuilder {
+    const embed = new EmbedBuilder().setColor("#0099ff").setTitle("ITG Queue");
+
+    if (this.length === 0) {
+      embed.setDescription("The queue is empty.");
+      return embed;
+    }
+
+    embed.addFields(
+      {
+        name: "#",
+        value: [...Array(this.length).keys()].map((i) => i + 1).join("\n"),
+        inline: true,
+      },
+      {
+        name: "P1",
+        value: this.p1q.map((p) => p ?? " ").join("\n"),
+        inline: true,
+      },
+      {
+        name: "P2",
+        value: this.p2q.map((p) => p ?? " ").join("\n"),
+        inline: true,
+      }
+    );
+    return embed;
+  }
+
+  public swap(i: number, iSide: "p1" | "p2", j: number, jSide: "p1" | "p2") {
+    if (i > this.length || j > this.length) {
+      throw new Error("Index out of bounds");
+    }
+    const piq = iSide === "p1" ? this.p1q : this.p2q;
+    const pjq = jSide === "p1" ? this.p1q : this.p1q;
+    const pi = piq[i];
+    const pj = pjq[j];
+    piq[i] = pj;
+    pjq[j] = pi;
+  }
+
+  public clear() {
+    this.p1q = [];
+    this.p2q = [];
+    this.length = 0;
+  }
 }
+
+export const globalQueue = new ITGQueue();
+// Sample for testing :)
+// globalQueue.join("Rohit");
+// globalQueue.join("Lucas");
+// globalQueue.join("Steph", "p2");
+// globalQueue.join("Katie", "p2");
+// globalQueue.join("Will", "p1");
