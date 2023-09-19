@@ -5,8 +5,8 @@ import { EmbedBuilder } from "discord.js";
  * The left column is for the p1 side, and the right column is for the p2 side.
  */
 export class ITGQueue {
-  p1q: (String | null)[];
-  p2q: (String | null)[];
+  private p1q: (String | null)[];
+  private p2q: (String | null)[];
   length: number;
   constructor() {
     this.p1q = [];
@@ -30,6 +30,9 @@ export class ITGQueue {
    * @optional side "p1", "p2"
    */
   public join(player: String, side: "p1" | "p2" | null = null) {
+    if (player === "") {
+      throw new Error("Player name cannot be empty");
+    }
     // Iterate through the queue and find an empty spot
     for (let i = 0; i < this.length; i++) {
       const row = this.get(i);
@@ -65,6 +68,9 @@ export class ITGQueue {
   public joinAt(player: String, i: number, side: "p1" | "p2") {
     if (i > this.length) {
       throw new Error("Index out of bounds");
+    }
+    if (player === "") {
+      throw new Error("Player name cannot be empty");
     }
     if (this.get(i)[side === "p1" ? 0 : 1] !== null) {
       throw new Error("Cannot join at an occupied position");
@@ -156,6 +162,33 @@ export class ITGQueue {
     this.p1q = [];
     this.p2q = [];
     this.length = 0;
+  }
+
+  /**
+   * Get a string representation of the queue.
+   * @returns a string representation of the queue
+   */
+  public toString(): String {
+    // Calculate max width of each column, row labels, and the queue as a whole
+    const qWidth = (x: String | null) => x?.length ?? 0;
+    const p1Width = Math.max(...this.p1q.map(qWidth), 3); // 3 is the length of "p1 "
+    const p2Width = Math.max(...this.p2q.map(qWidth), 2); // 2 is the length of "p2"
+    const labelWidth = this.length.toString().length + 2; // 2 is the length of ". "
+    const maxWidth = p1Width + p2Width + labelWidth + 2; // add 2 for rounding/spaces
+    // Construct the string line by line
+    const hashes = "#".repeat((maxWidth - 10) / 2);
+    let str = `${hashes} ITGQueue ${hashes}\n`;
+    str += `${" ".repeat(labelWidth)}p1 ${" ".repeat(p1Width - 2)} p2\n`;
+    for (let i = 0; i < this.length; i++) {
+      const row = this.get(i);
+      const labelSpaces = " ".repeat(
+        labelWidth - 2 - (i + 1).toString().length
+      );
+      const spaces = " ".repeat(p1Width - (row[0]?.length ?? 0) + 1);
+      str += `${labelSpaces}${i + 1}. `;
+      str += (row[0] ?? "") + spaces + (row[1] ?? "") + "\n";
+    }
+    return str;
   }
 }
 
