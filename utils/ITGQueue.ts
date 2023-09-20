@@ -72,14 +72,14 @@ export class ITGQueue {
     if (player === "") {
       throw new Error("Player name cannot be empty");
     }
-    if (this.get(i)[side === "p1" ? 0 : 1] !== null) {
-      throw new Error("Cannot join at an occupied position");
-    }
     // Increase the length of the queue if the player is joining at the end
     if (i === this.length) {
       this.p1q.push(null);
       this.p2q.push(null);
       this.length++;
+    }
+    if (this.get(i)[side === "p1" ? 0 : 1] !== null) {
+      throw new Error("Cannot join at an occupied position");
     }
     if (side === "p1") {
       this.p1q[i] = player;
@@ -115,6 +115,24 @@ export class ITGQueue {
       this.length--;
     }
   }
+
+  /**
+   * Remove the specified player from the queue
+   */
+  public removePlayer(player: String) {
+    for (let i = 0; i < this.length; i++) {
+      const row = this.get(i);
+      if (row[0] === player) {
+        this.remove(i, "p1");
+        return;
+      }
+      if (row[1] === player) {
+        this.remove(i, "p2");
+        return;
+      }
+    }
+  }
+
   /**
    * Returns an Embed representation of the queue.
    */
