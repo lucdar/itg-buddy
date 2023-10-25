@@ -54,6 +54,9 @@ function addPackFromLink(interaction: MessageOrInteraction, link: string) {
       } else if (output.includes("Pack already exists")) {
         // Prompt the user to overwrite the pack
         promptOverwrite(interaction, cli, "pack");
+      } else if (output.includes("Multiple valid pack directories found")) {
+        console.log("Multiple valid pack directories found!");
+        cli.stdin.write("1\n"); // Select the first (shortest) pack directory by default.
       }
     }
     if (output.includes("Pack metadata:")) {
