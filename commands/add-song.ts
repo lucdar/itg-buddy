@@ -1,4 +1,9 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
+import {
+  SlashCommandBuilder,
+  ChatInputCommandInteraction,
+  EmbedBuilder,
+  MessagePayload,
+} from "discord.js";
 import { Command } from "../utils/Interfaces";
 import { MessageOrInteraction } from "../utils/MessageOrInteraction";
 import { spawn } from "child_process";
@@ -72,7 +77,21 @@ export async function addSongFromLink(
     // Detect a successful song addition
     if (output.includes("Song added successfully")) {
       const songInfo = output.split("### Song added successfully ###")[1];
-      interaction.editReply(codeFormat("Song added successfully.", songInfo));
+      const embed = new EmbedBuilder()
+        .setTitle("Song added successfully")
+        .setDescription(codeFormat("", songInfo))
+        .setColor("#53d5fd")
+        .setFooter({
+          text: `added by ${interaction.user.tag}`,
+        });
+      if (interaction.channel == null) {
+        throw new Error("Interaction channel is null.");
+      }
+      interaction.reply(
+        MessagePayload.create(interaction.channel, {
+          embeds: [embed],
+        })
+      );
     }
   });
   cli.stderr.on("data", (output) => {

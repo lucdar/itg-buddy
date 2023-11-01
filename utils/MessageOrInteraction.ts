@@ -28,7 +28,7 @@ export class MessageOrInteraction {
       );
     }
     this.messageReply = null;
-    this.channel = messageOrInteraction.channel;
+    this.channel = this.message?.channel ?? this.interaction?.channel ?? null;
   }
 
   reply(content: string | MessagePayload) {
