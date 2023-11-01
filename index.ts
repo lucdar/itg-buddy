@@ -59,7 +59,7 @@ import { addSongFromLink } from "./commands/add-song";
 import { MessageOrInteraction } from "./utils/MessageOrInteraction";
 
 client.on(Events.MessageCreate, async (message) => {
-  console.log("Message sent!");
+  // console.log("Message sent!");
   if (message.channel.id !== config.addSongChannel) return;
   if (message.author.bot) return;
   const attachment = message.attachments.first();
