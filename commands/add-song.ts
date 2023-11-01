@@ -12,6 +12,7 @@ import {
   createErrorHandler,
   promptOverwrite,
 } from "../utils/helperFunctions";
+import config from "../config";
 
 const name = "add-song";
 const description = "Add a song from a specified link.";
@@ -46,7 +47,7 @@ export async function addSongFromLink(
     return;
   }
   const errorHandler = createErrorHandler();
-  const cli = spawn("python3", ["../itg-cli/main.py", "add-song", link]);
+  const cli = spawn("python3", [config.itgCliPath, "add-song", link]);
   cli.stdout.on("data", async (output: String) => {
     output = output.toString();
     // console.log('AddSong: received output from cli:', output);

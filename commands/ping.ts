@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
 import { Command } from "../utils/Interfaces";
 import { spawn } from "child_process";
+import config from "../config";
 
 /**
  * Ping command to test connection from bot to itg-cli-server to itg-cli and back.
@@ -14,7 +15,7 @@ export const ping: Command = {
     return new Promise(async (resolve, reject) => {
       console.log("Ping: executing command");
       await interaction.reply("Pinging...");
-      const cli = spawn("python3", ["../itg-cli/main.py", "ping"]);
+      const cli = spawn("python3", [config.itgCliPath, "ping"]);
       cli.stdout.on("data", (output: String) => {
         // 'data' event happens when python process prints to stdout
         if (output.toString().indexOf("pong") !== -1) {

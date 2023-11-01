@@ -22,6 +22,7 @@ export class Config {
   guildId: string;
   addSongChannel: string;
   saveFolder: string | null;
+  itgCliPath: string;
 
   constructor(configPath: string) {
     let config: any = yaml.load(fs.readFileSync(configPath, "utf8"));
@@ -32,6 +33,7 @@ export class Config {
     this.guildId = config.guildId;
     this.addSongChannel = config.addSongChannel;
     this.saveFolder = config.saveFolder;
+    this.itgCliPath = config.itgCliPath;
     // Using == because I'm not sure how yaml loads undefined values
     if (this.saveFolder == undefined) {
       this.saveFolder = null;

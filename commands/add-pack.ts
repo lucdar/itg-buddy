@@ -7,6 +7,7 @@ import {
   createErrorHandler,
 } from "../utils/helperFunctions";
 import { MessageOrInteraction } from "../utils/MessageOrInteraction";
+import config from "../config";
 
 const name = "add-pack";
 const description = "Adds a simfile pack from the specified link.";
@@ -40,7 +41,7 @@ function addPackFromLink(interaction: MessageOrInteraction, link: string) {
     interaction.editReply("Invalid link.");
     return;
   }
-  const cli = spawn("python3", ["../itg-cli/main.py", "add-pack", link]);
+  const cli = spawn("python3", [config.itgCliPath, "add-pack", link]);
   let packMetadata: string = "";
   const errorHandler = createErrorHandler();
   cli.stdout.on("data", (data) => {
