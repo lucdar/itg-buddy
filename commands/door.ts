@@ -25,7 +25,7 @@ export const ping: Command = {
       await interaction.reply("Ringing doorbell...");
       let doorbell_message = interaction.options.getString("message") || "";
       const cli = spawn(config.doorbellPath, [
-        interaction.user.displayName,
+        interaction.user.username,
         `"${doorbell_message}"`,
       ]);
       // Pass output to the console
