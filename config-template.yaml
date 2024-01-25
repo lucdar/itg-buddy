@@ -11,6 +11,9 @@ clientId: ""
 guildId: ""
 addSongChannel: ""
 
+# Discord user ID to be notified in the case of errors.
+adminID: ""
+
 # Path to itgmania itg-cli main.py file. Used to launch itg-cli.
 itgCliPath: ""
 
@@ -18,3 +21,7 @@ itgCliPath: ""
 # Make sure you have the ScreenSwitcher and WriteSongInfo modules installed.
 # https://github.com/Simply-Love/Simply-Love-Modules
 saveFolder: "" # Comment this line if you don't want to use this feature.
+
+# Path to doorbell script. Used to notify players that someone is at the door.
+# Stdout is sent to the console for debugging.
+doorbellPath: ""
