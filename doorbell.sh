@@ -1,10 +1,9 @@
 #!/bin/bash
 
-$NAME=$1
-$MESSAGE=$2
+name=$1
+message=$2
+thirty_seconds=30000
 
 eval "export $(egrep -z DBUS_SESSION_BUS_ADDRESS /proc/$(pgrep -u $LOGNAME xfce4-session)/environ)"
 
-sixty_seconds_to_ms=600000
-
-notify-send -t $sixty_seconds_to_ms -i $icon "Ding Dong!" "$NAME is at the door. $MESSAGE"
+notify-send -t $thirty_seconds "Ding Dong!" "$name is at the door. $message"
