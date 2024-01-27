@@ -1,4 +1,8 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction } from "discord.js";
+import {
+  SlashCommandBuilder,
+  ChatInputCommandInteraction,
+  User,
+} from "discord.js";
 import { Command } from "../utils/Interfaces";
 import { spawn } from "child_process";
 import config from "../config";
@@ -9,24 +13,24 @@ import config from "../config";
 const name = "door";
 const description = "Rings the doorbell notification on the machine.";
 
-export const ping: Command = {
+export const door: Command = {
   data: new SlashCommandBuilder()
     .setName(name)
     .setDescription(description)
     .addStringOption((option) =>
       option
         .setName("message")
-        .setDescription("The link to the pack to add.")
+        .setDescription("Message to display in the notification.")
         .setRequired(false)
     ),
   async execute(interaction: ChatInputCommandInteraction) {
     return new Promise(async (resolve, reject) => {
       console.log("Door: executing command");
       await interaction.reply("Ringing doorbell...");
-      let doorbell_message = interaction.options.getString("message") || "";
+      let doorbellMessage = interaction.options.getString("message") || "";
       const cli = spawn(config.doorbellPath, [
         interaction.user.username,
-        `"${doorbell_message}"`,
+        `"${doorbellMessage}"`,
       ]);
       // Pass output to the console
       cli.stdout.on("data", (data: any) => {
@@ -37,14 +41,18 @@ export const ping: Command = {
       cli.on("close", (code: number) => {
         if (code === 0) {
           console.log("Door: Doorbell rung successfully!");
-          interaction.editReply("Ding Dong! Sent a message to the machine.");
+          interaction.editReply(
+            "Sent a notification to the machine".concat(
+              doorbellMessage ? `: \`${doorbellMessage}\`.` : "."
+            )
+          );
           resolve();
         } else {
-          const adminID = config.adminID;
-          console.log("Door: did not receive pong from cli");
+          const admin = interaction.guild?.members.cache.get(config.adminID);
+          console.log("Door: Doorbell failed to ring.");
           interaction.editReply(
             "Uh Oh! Something went wrong.".concat(
-              `Pinging @<${adminID}> for help.`
+              admin ? `Pinging ${admin.toString()} for help.` : ""
             )
           );
           reject(`Exited with code ${code}`);
