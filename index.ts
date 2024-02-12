@@ -97,6 +97,7 @@ if (config.saveFolder === null) {
       case "ScreenGameplay": {
         // Gameplay Screen
         status = "online";
+        // console.log("Song Info: " + gamestate.songInfo);
         activity = {
           name: `${gamestate.songInfo?.title}`,
           type: ActivityType.Playing,

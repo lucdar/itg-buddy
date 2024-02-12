@@ -28,17 +28,18 @@ export const door: Command = {
       console.log("Door: executing command");
       await interaction.reply("Ringing doorbell...");
       let doorbellMessage = interaction.options.getString("message") || "";
-      const cli = spawn(config.doorbellPath, [
-        interaction.user.username,
-        `"${doorbellMessage}"`,
-      ]);
+      const sh = spawn(
+        config.doorbellPath,
+        [interaction.user.username, `"${doorbellMessage}"`],
+        { shell: true } // https://stackoverflow.com/a/48015471/22049792
+      );
       // Pass output to the console
-      cli.stdout.on("data", (data: any) => {
+      sh.stdout.on("data", (data: any) => {
         const output: String = data.toString();
         console.log(`Door: stdout: ${output}`);
       });
 
-      cli.on("close", (code: number) => {
+      sh.on("close", (code: number) => {
         if (code === 0) {
           console.log("Door: Doorbell rung successfully!");
           interaction.editReply(
