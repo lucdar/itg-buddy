@@ -19,10 +19,12 @@ export function watchGamestate(callback: (gamestate: any) => void) {
   });
 
   watcher.on("change", (path) => {
-    if (path.includes("")) {
+    // TODO: Write a SL module that writes all gamestate info to one file.
+    setTimeout(() => {
+      // Delay to allow both files to finish writing
       const gamestate = new Gamestate();
       callback(gamestate);
-    }
+    }, 1000);
   });
 }
 
@@ -66,6 +68,7 @@ export class Gamestate {
     const songInfoPath = path.join(config.saveFolder, "SongInfo.txt");
     const songInfoFile = fs.readFileSync(songInfoPath, "utf8");
     const songInfoLines = songInfoFile.split(" | ");
+    console.log(songInfoLines);
     this.songInfo = {
       title: songInfoLines[0].split(": ")[1],
       artist: songInfoLines[1].split(": ")[1],
