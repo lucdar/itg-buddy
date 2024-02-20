@@ -68,7 +68,7 @@ export class Gamestate {
     const songInfoPath = path.join(config.saveFolder, "SongInfo.txt");
     const songInfoFile = fs.readFileSync(songInfoPath, "utf8");
     const songInfoLines = songInfoFile.split(" | ");
-    console.log(songInfoLines);
+    // console.log(songInfoLines);
     this.songInfo = {
       title: songInfoLines[0].split(": ")[1],
       artist: songInfoLines[1].split(": ")[1],
